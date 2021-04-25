@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head>
+    <title>SPRecurrence</title>
+
+  </head>
+  <body>
+    <script type="text/javascript">
+    text = `<recurrence><rule><firstDayOfWeek>su</firstDayOfWeek><repeat><daily dayFrequency="1" /></repeat>
+      <repeatForever>FALSE</repeatForever>
+      </rule></recurrence>`;
+            
+
+      class SPRecurrence {
+
+        DAYS_OF_WEEK = { "SU":0, "MO":1, "TU":2, "WE":3, "TH":4, "FR":5, "SA":6 };
+
+        _parser = new DOMParser();        
+        _isForever = false;
+        _count;
+        _end;
+        _xmlDoc;
+        eventDate;
+        _duration;
+        _repeating;
+        _frequency;
+        _weekStart = 0; // default week starts on Sunday
+
+        constructor(recurrenceXmlString, eventDate, endDate, duration) {
+          this._xmlDoc = this._parser.parseFromString(recurrenceXmlString,"text/xml");
+          this.eventDate = eventDate;
+          this._duration = duration;          
+
+          const count = this._xmlDoc.getElementsByTagName("repeatInstances");
+          if (count.length == 1) { this._count = count[0].innerHTML; }
+
+          const windowEnd = this._xmlDoc.getElementsByTagName("windowEnd");
+          if (windowEnd.length == 1) { this._end = new Date(windowEnd[0].innerHTML); }
+
+          const repeatForever = this._xmlDoc.getElementsByTagName("repeatForever");
+          if (repeatForever.length == 1) { this._isForever = true; }
+
+
+          const weekStart = this._xmlDoc.getElementsByTagName("firstDayOfWeek")[0];
+          this._weekStart = this.DAYS_OF_WEEK[weekStart.innerHTML.toUpperCase()];
+
+          const repeat = this._xmlDoc.getElementsByTagName("repeat")[0];          
+          this._repeating = repeat.children[0].tagName.toUpperCase();
+          console.log("Repeats: ", this._repeating);
+          switch (this._repeating[0]) {
+            case "D": this._frequency = Number(repeat.children[0].getAttribute("dayFrequency"));
+            case "W": break;
+            case "M": break;
+              // monthly
+              // monthly by day            
+            case "Y": break;
+
+          }
+          
+        }
+
+        getEvents = () => {
+          return [];
+        }
+
+      }
+
+      const recur = new SPRecurrence(text);
+      console.log("Recurrence: ", recur);
+      console.log(recur.getEvents());
+
+    </script>
+  </body>
+</html>
+
+
